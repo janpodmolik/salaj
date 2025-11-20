@@ -82,76 +82,126 @@ const { galleryImages } = Astro.props;
     </div>
   </div>
 
-  <!-- Hidden gallery container -->
+  <!-- Hidden gallery images data -->
   <div
-    id="gallery-container"
-    style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;"
+    id="gallery-data"
+    data-images={JSON.stringify(galleryImages)}
+    style="display: none;"
   >
-    {
-      galleryImages.map((image) => (
-        <a href={image.url} class="glightbox" data-gallery={image.category}>
-          <img
-            src={image.url}
-            alt={image.title}
-            loading="eager"
-            width="800"
-            height="600"
-          />
-        </a>
-      ))
-    }
   </div>
 </section>
 
-<script is:inline>
-  function initGallery() {
-    if (typeof GLightbox === "undefined") {
-      setTimeout(initGallery, 100);
-      return;
-    }
+<script>
+  import PhotoSwipeLightbox from "photoswipe/lightbox";
 
-    const lightbox = GLightbox({
-      selector: ".glightbox",
-      touchNavigation: true,
-      loop: true,
-      draggable: true,
-      keyboardNavigation: true,
-      closeOnOutsideClick: true,
+  interface GalleryImage {
+    id: string;
+    url: string;
+    title: string;
+    category: string;
+  }
+
+  const galleryDataEl = document.getElementById("gallery-data");
+  const galleryImages: GalleryImage[] = galleryDataEl
+    ? JSON.parse(galleryDataEl.getAttribute("data-images") || "[]")
+    : [];
+
+  const lightbox = new PhotoSwipeLightbox({
+    pswpModule: () => import("photoswipe"),
+    dataSource: [],
+    showHideAnimationType: "zoom",
+    bgOpacity: 0.8,
+    loop: true,
+    closeOnVerticalDrag: true,
+    pinchToClose: true,
+    padding: { top: 60, bottom: 100, left: 20, right: 20 },
+  });
+
+  // Add thumbnails UI after PhotoSwipe opens
+  lightbox.on("uiRegister", function () {
+    lightbox.pswp?.ui?.registerElement({
+      name: "thumbnails-wrapper",
+      order: 9,
+      isButton: false,
+      appendTo: "root",
+      onInit: (el: HTMLElement) => {
+        el.className = "pswp__thumbnails";
+
+        const updateThumbnails = () => {
+          if (!lightbox.pswp) return;
+
+          const currentDataSource = lightbox.options.dataSource as any[];
+          el.innerHTML = "";
+
+          currentDataSource.forEach((item, index) => {
+            const thumb = document.createElement("img");
+            thumb.src = item.src;
+            thumb.className = "pswp__thumbnail";
+            thumb.alt = item.alt || "";
+
+            if (index === lightbox.pswp!.currIndex) {
+              thumb.classList.add("pswp__thumbnail--active");
+            }
+
+            thumb.addEventListener("click", () => {
+              lightbox.pswp?.goTo(index);
+            });
+
+            el.appendChild(thumb);
+          });
+        };
+
+        updateThumbnails();
+
+        lightbox.pswp?.on("change", () => {
+          const thumbs = el.querySelectorAll(".pswp__thumbnail");
+          thumbs.forEach((thumb, index) => {
+            if (index === lightbox.pswp!.currIndex) {
+              thumb.classList.add("pswp__thumbnail--active");
+            } else {
+              thumb.classList.remove("pswp__thumbnail--active");
+            }
+          });
+        });
+      },
     });
+  });
 
-    const triggers = document.querySelectorAll(".gallery-trigger");
+  lightbox.init();
 
-    triggers.forEach((trigger) => {
-      trigger.addEventListener("click", (e) => {
-        e.preventDefault();
-        const category = trigger.getAttribute("data-category");
+  // Gallery trigger handlers
+  const triggers = document.querySelectorAll(".gallery-trigger");
 
-        if (category) {
-          const categoryImages = document.querySelectorAll(
-            `.glightbox[data-gallery="${category}"]`
+  triggers.forEach((trigger) => {
+    trigger.addEventListener("click", (e) => {
+      e.preventDefault();
+      const category = trigger.getAttribute("data-category");
+
+      if (category) {
+        const categoryImages = galleryImages.filter(
+          (img) => img.category === category
+        );
+
+        if (categoryImages.length > 0) {
+          // Create PhotoSwipe data source
+          const dataSource = categoryImages.map((img) => ({
+            src: img.url,
+            width: 1200,
+            height: 900,
+            alt: img.title,
+            title: img.title,
+          }));
+
+          lightbox.options.dataSource = dataSource;
+          lightbox.loadAndOpen(0);
+        } else {
+          alert(
+            `Galerie pro kategorii "${category}" zatím neobsahuje žádné fotky.`
           );
-
-          if (categoryImages.length > 0) {
-            const firstImage = categoryImages[0];
-            const allImages = document.querySelectorAll(".glightbox");
-            const index = Array.from(allImages).indexOf(firstImage);
-
-            lightbox.openAt(index);
-          } else {
-            alert(
-              `Galerie pro kategorii "${category}" zatím neobsahuje žádné fotky.`
-            );
-          }
         }
-      });
+      }
     });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initGallery);
-  } else {
-    initGallery();
-  }
+  });
 </script>
 
 <style>
