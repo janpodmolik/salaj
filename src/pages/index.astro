@@ -7,7 +7,6 @@ import Spacer from "../components/Spacer.astro";
 import Hero from "../sections/Hero.astro";
 import About from "../sections/About.astro";
 import Services from "../sections/Services.astro";
-import Gallery from "../components/Gallery.astro";
 import Contact from "../sections/Contact.astro";
 
 // Import CMS data
@@ -18,58 +17,72 @@ import emergencyContactData from "../content/emergency-contact.json";
 const galleryImages = [
   {
     id: "1",
-    url: "https://picsum.photos/800/600?random=1",
+    url: "https://picsum.photos/id/10/800/600",
     title: "Sprchový kout 1",
     category: "sprchovekouty",
   },
   {
     id: "2",
-    url: "https://picsum.photos/800/600?random=2",
+    url: "https://picsum.photos/id/20/800/600",
     title: "Sprchový kout 2",
     category: "sprchovekouty",
   },
   {
     id: "3",
-    url: "https://picsum.photos/800/600?random=3",
+    url: "https://picsum.photos/id/30/800/600",
     title: "Skleněný obklad",
     category: "obklady",
   },
   {
     id: "4",
-    url: "https://picsum.photos/800/600?random=4",
+    url: "https://picsum.photos/id/40/800/600",
     title: "Kuchyňský obklad",
     category: "obklady",
   },
   {
     id: "5",
-    url: "https://picsum.photos/800/600?random=5",
+    url: "https://picsum.photos/id/50/800/600",
     title: "Posuvné dveře",
     category: "dvere",
   },
   {
     id: "6",
-    url: "https://picsum.photos/800/600?random=6",
+    url: "https://picsum.photos/id/60/800/600",
     title: "Skleněná příčka",
     category: "dvere",
   },
   {
     id: "7",
-    url: "https://picsum.photos/800/600?random=7",
+    url: "https://picsum.photos/id/70/800/600",
     title: "Zábradlí 1",
     category: "zabradli",
   },
   {
     id: "8",
-    url: "https://picsum.photos/800/600?random=8",
+    url: "https://picsum.photos/id/80/800/600",
     title: "Zábradlí 2",
     category: "zabradli",
+  },
+  {
+    id: "9",
+    url: "https://picsum.photos/id/90/800/600",
+    title: "Montáž sprchového koutu",
+    category: "montaze",
+  },
+  {
+    id: "10",
+    url: "https://picsum.photos/id/100/800/600",
+    title: "CNC opracování",
+    category: "opracovani",
   },
 ];
 ---
 
 <Layout>
   <Header />
+  <Spacer size="xl" />
   <Hero openingHours={openingHoursData} />
+  <Spacer size="xl" />
   <EmergencyBanner
     phone={emergencyContactData.phone}
     showAlert={emergencyContactData.show_alert}
@@ -77,11 +90,9 @@ const galleryImages = [
   <Spacer size="xl" />
   <About />
   <Spacer size="xl" />
-  <Services />
-  <Spacer size="xl" />
-  <Gallery images={galleryImages} />
+  <Services galleryImages={galleryImages} />
   <Spacer size="xl" />
   <Contact openingHours={openingHoursData} />
-  <Spacer size="lg" />
+  <Spacer size="md" />
   <Footer />
 </Layout>

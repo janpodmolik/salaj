@@ -2,11 +2,27 @@
 import { siteConfig } from "../config";
 
 const services = siteConfig.services;
+
+interface Props {
+  galleryImages: Array<{
+    id: string;
+    url: string;
+    title: string;
+    category: string;
+  }>;
+}
+
+const { galleryImages } = Astro.props;
 ---
 
 <section id="sluzby" class="services-section">
   <div class="container">
-    <h2 class="section-title glass-card-gradient">Naše služby</h2>
+    <h2
+      class="section-title glass-card-gradient"
+      style="--shimmer-delay: 0.7s; --shimmer-duration: 3.8s;"
+    >
+      Naše služby
+    </h2>
     <p class="text-center text-muted">
       Komplexní sklenářské služby pro každou potřebu
     </p>
@@ -15,13 +31,37 @@ const services = siteConfig.services;
       {
         services.map((service) => (
           <div class="service-card glass-card">
-            <h3>{service.title}</h3>
-            <p>{service.description}</p>
-            <ul class="service-features">
-              {service.features.map((feature) => (
-                <li>✓ {feature}</li>
-              ))}
-            </ul>
+            <div class="service-content">
+              <h3>{service.title}</h3>
+              <p>{service.description}</p>
+              <ul class="service-features">
+                {service.features.map((feature) => (
+                  <li>✓ {feature}</li>
+                ))}
+              </ul>
+            </div>
+            <button
+              class="btn btn-glass gallery-trigger"
+              data-category={service.galleryCategory}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="margin-right: 0.5rem;"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              Zobrazit galerii
+            </button>
           </div>
         ))
       }
@@ -33,11 +73,103 @@ const services = siteConfig.services;
         {
           siteConfig.additionalServices.map((service) => (
             <div class="service-item">
-              <strong>{service.title}:</strong> {service.description}
+              <strong>{service.title}</strong>
+              <p>{service.description}</p>
             </div>
           ))
         }
       </div>
     </div>
   </div>
+
+  <!-- Hidden gallery container -->
+  <div
+    id="gallery-container"
+    style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;"
+  >
+    {
+      galleryImages.map((image) => (
+        <a href={image.url} class="glightbox" data-gallery={image.category}>
+          <img
+            src={image.url}
+            alt={image.title}
+            loading="eager"
+            width="800"
+            height="600"
+          />
+        </a>
+      ))
+    }
+  </div>
 </section>
+
+<script is:inline>
+  function initGallery() {
+    if (typeof GLightbox === "undefined") {
+      setTimeout(initGallery, 100);
+      return;
+    }
+
+    const lightbox = GLightbox({
+      selector: ".glightbox",
+      touchNavigation: true,
+      loop: true,
+      draggable: true,
+      keyboardNavigation: true,
+      closeOnOutsideClick: true,
+    });
+
+    const triggers = document.querySelectorAll(".gallery-trigger");
+
+    triggers.forEach((trigger) => {
+      trigger.addEventListener("click", (e) => {
+        e.preventDefault();
+        const category = trigger.getAttribute("data-category");
+
+        if (category) {
+          const categoryImages = document.querySelectorAll(
+            `.glightbox[data-gallery="${category}"]`
+          );
+
+          if (categoryImages.length > 0) {
+            const firstImage = categoryImages[0];
+            const allImages = document.querySelectorAll(".glightbox");
+            const index = Array.from(allImages).indexOf(firstImage);
+
+            lightbox.openAt(index);
+          } else {
+            alert(
+              `Galerie pro kategorii "${category}" zatím neobsahuje žádné fotky.`
+            );
+          }
+        }
+      });
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initGallery);
+  } else {
+    initGallery();
+  }
+</script>
+
+<style>
+  .service-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .service-content {
+    flex: 1;
+  }
+
+  .gallery-trigger {
+    margin-top: 1.5rem;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>

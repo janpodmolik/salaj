@@ -17,11 +17,12 @@ export const siteConfig = {
       zip: "750 02",
       full: "Gen. Fajtla 3483/12, (areál Želátovských kasáren), 750 02 Přerov",
     },
-    googleMapsUrl: "https://maps.google.com/?q=Gen.+Fajtla+3483/12,+Přerov",
+    googleMapsUrl: "https://maps.app.goo.gl/9a3v9qmgEEUSpGRj7",
   },
 
   social: {
     facebook: "https://www.facebook.com/salajprerov",
+    instagram: "https://www.instagram.com/salaj.sklenarstvi/",
   },
 
   openingHours: {
@@ -56,6 +57,7 @@ export const siteConfig = {
         "Skleněné sprchové závěsy",
         "Bezpečnostní skla",
       ],
+      galleryCategory: "sprchovekouty",
     },
     {
       title: "Skleněné obklady",
@@ -67,6 +69,7 @@ export const siteConfig = {
         "Barevné varianty",
         "Snadná údržba",
       ],
+      galleryCategory: "obklady",
     },
     {
       title: "Dveře a příčky",
@@ -78,6 +81,7 @@ export const siteConfig = {
         "Bezpečnostní skla",
         "Různé typy kovacích kování",
       ],
+      galleryCategory: "dvere",
     },
     {
       title: "Zábradlí",
@@ -89,6 +93,7 @@ export const siteConfig = {
         "Různé systémy uchycení",
         "Bezpečnostní skla",
       ],
+      galleryCategory: "zabradli",
     },
     {
       title: "Montáže a instalace",
@@ -100,6 +105,7 @@ export const siteConfig = {
         "Montáž dveří a příček",
         "Zaměření a instalace",
       ],
+      galleryCategory: "montaze",
     },
     {
       title: "Opracování skla",
@@ -111,6 +117,7 @@ export const siteConfig = {
         "Vrtání otvorů",
         "CNC opracování",
       ],
+      galleryCategory: "opracovani",
     },
   ],
 

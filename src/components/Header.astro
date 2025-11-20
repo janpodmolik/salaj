@@ -53,6 +53,7 @@ const navLinks = [
   toggle?.addEventListener("click", () => {
     navLinks?.classList.toggle("active");
     toggle?.classList.toggle("active");
+    document.body.classList.toggle("menu-open");
   });
 
   // Close menu when clicking a link
@@ -60,7 +61,19 @@ const navLinks = [
     link.addEventListener("click", () => {
       navLinks?.classList.remove("active");
       toggle?.classList.remove("active");
+      document.body.classList.remove("menu-open");
     });
+  });
+
+  // Close menu when clicking overlay
+  const overlay = document.createElement("div");
+  overlay.className = "menu-overlay";
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener("click", () => {
+    navLinks?.classList.remove("active");
+    toggle?.classList.remove("active");
+    document.body.classList.remove("menu-open");
   });
 
   // Sticky header on scroll
@@ -215,40 +228,77 @@ const navLinks = [
   @media (max-width: 768px) {
     .mobile-menu-toggle {
       display: block;
+      z-index: 1002;
     }
 
     .nav-links {
       position: fixed;
-      top: 70px;
-      left: 0;
-      right: 0;
+      top: 0;
+      right: -100%;
+      bottom: 0;
+      width: 80%;
+      max-width: 400px;
+      height: 100vh;
       flex-direction: column;
       background: var(--glass-white-strong);
       backdrop-filter: blur(20px);
-      padding: 2rem;
+      padding: 6rem 2rem 3rem;
       gap: 1.5rem;
-      transform: translateY(-100%);
-      opacity: 0;
-      visibility: hidden;
-      transition: all var(--transition-smooth);
-      border-bottom: 1px solid var(--glass-border);
-      box-shadow: 0 8px 32px 0 var(--glass-shadow);
+      transition: right var(--transition-smooth);
+      box-shadow: -4px 0 32px 0 rgba(17, 45, 78, 0.3);
+      overflow-y: auto;
+      z-index: 1001;
     }
 
     .nav-links.active {
-      transform: translateY(0);
-      opacity: 1;
-      visibility: visible;
+      right: 0;
     }
 
     .nav-links li {
       width: 100%;
+    }
+
+    .nav-links a {
+      display: block;
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      background: rgba(249, 247, 247, 0.95);
       text-align: center;
+      color: var(--text-primary);
+    }
+
+    .nav-links a:not(.btn)::after {
+      display: none;
     }
 
     .btn-emergency {
       width: 100%;
+      background: var(--accent-primary) !important;
       color: #ffffff !important;
     }
+  }
+
+  /* Menu overlay */
+  :global(body.menu-open) {
+    overflow: hidden;
+  }
+
+  :global(.menu-overlay) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(17, 45, 78, 0.5);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-smooth);
+    z-index: 999;
+  }
+
+  :global(body.menu-open .menu-overlay) {
+    opacity: 1;
+    visibility: visible;
   }
 </style>
