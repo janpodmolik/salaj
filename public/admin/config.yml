@@ -1,0 +1,41 @@
+backend:
+  name: github
+  repo: janpodmolik/salaj
+  branch: main
+  base_url: https://janpodmolik.github.io
+  auth_endpoint: /salaj/admin/
+
+media_folder: "public/images"
+public_folder: "/images"
+
+collections:
+  - name: "settings"
+    label: "Nastavení"
+    files:
+      - name: "opening_hours"
+        label: "Otevírací doba"
+        file: "src/content/opening-hours.json"
+        fields:
+          - { label: "Dny", name: "days", widget: "string", default: "Po - Pá" }
+          - { label: "Čas", name: "hours", widget: "string", default: "7.00 - 16.30 hodin" }
+          - { label: "Povolit otevírací dobu", name: "enabled", widget: "boolean", default: true }
+      
+      - name: "emergency_contact"
+        label: "Havarijní kontakt"
+        file: "src/content/emergency-contact.json"
+        fields:
+          - { label: "Telefonní číslo", name: "phone", widget: "string", default: "604 762 150" }
+          - { label: "Zobrazit upozornění", name: "show_alert", widget: "boolean", default: true }
+
+  - name: "gallery"
+    label: "Galerie"
+    folder: "src/content/gallery"
+    create: true
+    slug: "{{category}}-{{slug}}"
+    fields:
+      - { label: "Název", name: "title", widget: "string" }
+      - { label: "Kategorie", name: "category", widget: "select", options: ["sprchovekouty", "obklady", "dvere", "zabradli", "montaze", "opracovani"] }
+      - { label: "Obrázek", name: "image", widget: "image" }
+      - { label: "Popis", name: "description", widget: "text", required: false }
+      - { label: "Pořadí", name: "order", widget: "number", default: 0 }
+      - { label: "Datum přidání", name: "date", widget: "datetime", default: "" }

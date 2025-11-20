@@ -1,0 +1,40 @@
+---
+import { siteConfig } from "../config";
+import OpeningHours from "../components/OpeningHours.astro";
+
+interface Props {
+  openingHours: { days: string; hours: string; enabled: boolean };
+}
+
+const { openingHours } = Astro.props;
+const { name, company } = siteConfig;
+---
+
+<section id="hero" class="hero-section">
+  <div class="container">
+    <div class="hero-content glass-card">
+      <h1 class="fade-in-up">{name}</h1>
+      <p class="hero-subtitle">
+        Více než {company.yearsInBusiness} let působíme úspěšně v oblasti práce se
+        sklem v České republice.
+      </p>
+      <p class="hero-description">
+        Kvalitně a odborně provedené sklenářské práce tvoří jasnou známku naší
+        profesionality.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#kontakt" class="btn btn-primary">Kontaktujte nás</a>
+        <a href="#sluzby" class="btn btn-glass">Naše služby</a>
+      </div>
+
+      <div class="hero-hours">
+        <OpeningHours
+          days={openingHours.days}
+          hours={openingHours.hours}
+          enabled={openingHours.enabled}
+        />
+      </div>
+    </div>
+  </div>
+</section>

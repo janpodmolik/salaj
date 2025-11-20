@@ -1,0 +1,26 @@
+---
+// Spacer component for controlling spacing between sections
+interface Props {
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+  class?: string;
+}
+
+const { size = "md", class: className } = Astro.props;
+
+const sizes = {
+  xs: "1rem",
+  sm: "2rem",
+  md: "3.5rem",
+  lg: "5rem",
+  xl: "7rem",
+  "2xl": "10rem",
+};
+---
+
+<div class={`spacer ${className || ""}`} style={`height: ${sizes[size]}`}></div>
+
+<style>
+  .spacer {
+    width: 100%;
+  }
+</style>

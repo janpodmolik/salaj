@@ -1,0 +1,257 @@
+---
+import { siteConfig } from "../config";
+
+interface GalleryImage {
+  id: string;
+  url: string;
+  title: string;
+  category: string;
+}
+
+interface Props {
+  images: GalleryImage[];
+}
+
+const { images } = Astro.props;
+
+// Group images by category
+const categories = siteConfig.gallery.categories;
+
+const imagesByCategory = categories.map((cat) => ({
+  ...cat,
+  images: images.filter((img) => img.category === cat.id),
+}));
+---
+
+<div class="gallery-section" id="galerie">
+  <div class="container">
+    <h2 class="section-title glass-card-gradient">Naše práce</h2>
+    <p class="text-center text-muted">Ukázky realizovaných projektů</p>
+
+    <div class="gallery-tabs">
+      {
+        categories.map((cat, index) => (
+          <button
+            class={`tab-button ${index === 0 ? "active" : ""}`}
+            data-category={cat.id}
+          >
+            {cat.label}
+          </button>
+        ))
+      }
+    </div>
+
+    {
+      imagesByCategory.map((cat, index) => (
+        <div
+          class={`gallery-grid ${index === 0 ? "active" : ""}`}
+          data-category-content={cat.id}
+        >
+          {cat.images.length > 0 ? (
+            cat.images.map((img) => (
+              <a
+                href={img.url}
+                class="gallery-item glass-card"
+                data-gallery={cat.id}
+              >
+                <img src={img.url} alt={img.title} loading="lazy" />
+                <div class="gallery-overlay">
+                  <span class="gallery-title">{img.title}</span>
+                </div>
+              </a>
+            ))
+          ) : (
+            <div class="empty-gallery glass-card">
+              <p>Fotografie budou brzy přidány</p>
+            </div>
+          )}
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  import GLightbox from "glightbox";
+  import "glightbox/dist/css/glightbox.min.css";
+
+  // Initialize GLightbox for each category
+  const categories = [
+    "sprchovekouty",
+    "obklady",
+    "dvere",
+    "zabradli",
+    "montaze",
+    "opracovani",
+  ];
+
+  categories.forEach((cat) => {
+    GLightbox({
+      selector: `[data-gallery="${cat}"]`,
+      touchNavigation: true,
+      loop: true,
+      autoplayVideos: true,
+    });
+  });
+
+  // Tab switching functionality
+  const tabButtons = document.querySelectorAll(".tab-button");
+  const galleryGrids = document.querySelectorAll("[data-category-content]");
+
+  tabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const category = button.getAttribute("data-category");
+
+      // Update active tab
+      tabButtons.forEach((btn) => btn.classList.remove("active"));
+      button.classList.add("active");
+
+      // Show corresponding gallery
+      galleryGrids.forEach((grid) => {
+        if (grid.getAttribute("data-category-content") === category) {
+          grid.classList.add("active");
+        } else {
+          grid.classList.remove("active");
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  .gallery-section {
+    padding: 3.5rem 2rem;
+  }
+
+  .section-title {
+    text-align: center;
+    padding: 2rem 3rem;
+    margin: 0 auto 3rem;
+    max-width: 600px;
+    border-radius: var(--radius-md);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(63, 114, 175, 0.3);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+  }
+
+  .gallery-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin: 3rem 0 2rem;
+  }
+
+  .tab-button {
+    padding: 0.75rem 1.5rem;
+    background: var(--glass-white-medium);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+  }
+
+  .tab-button:hover {
+    background: var(--color-light);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    border-color: var(--accent-primary);
+  }
+
+  .tab-button.active {
+    background: linear-gradient(
+      135deg,
+      var(--color-medium) 0%,
+      var(--color-darkest) 100%
+    );
+    color: var(--text-light);
+    border-color: var(--color-medium);
+    box-shadow: 0 4px 15px rgba(63, 114, 175, 0.5);
+  }
+
+  .gallery-grid {
+    display: none;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .gallery-grid.active {
+    display: grid;
+  }
+
+  .gallery-item {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-smooth);
+  }
+
+  .gallery-item:hover img {
+    transform: scale(1.1);
+  }
+
+  .gallery-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    transform: translateY(100%);
+    transition: transform var(--transition-smooth);
+  }
+
+  .gallery-item:hover .gallery-overlay {
+    transform: translateY(0);
+  }
+
+  .gallery-title {
+    color: var(--text-light);
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .empty-gallery {
+    grid-column: 1 / -1;
+    padding: 3rem;
+    text-align: center;
+  }
+
+  .empty-gallery p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+  }
+
+  @media (max-width: 768px) {
+    .gallery-section {
+      padding: 3rem 1rem;
+    }
+
+    .gallery-tabs {
+      gap: 0.75rem;
+    }
+
+    .tab-button {
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .gallery-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+  }
+</style>

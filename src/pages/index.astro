@@ -1,16 +1,87 @@
 ---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import EmergencyBanner from "../components/EmergencyBanner.astro";
+import Spacer from "../components/Spacer.astro";
+import Hero from "../sections/Hero.astro";
+import About from "../sections/About.astro";
+import Services from "../sections/Services.astro";
+import Gallery from "../components/Gallery.astro";
+import Contact from "../sections/Contact.astro";
 
+// Import CMS data
+import openingHoursData from "../content/opening-hours.json";
+import emergencyContactData from "../content/emergency-contact.json";
+
+// Placeholder gallery images (will be replaced with CMS images)
+const galleryImages = [
+  {
+    id: "1",
+    url: "https://picsum.photos/800/600?random=1",
+    title: "Sprchový kout 1",
+    category: "sprchovekouty",
+  },
+  {
+    id: "2",
+    url: "https://picsum.photos/800/600?random=2",
+    title: "Sprchový kout 2",
+    category: "sprchovekouty",
+  },
+  {
+    id: "3",
+    url: "https://picsum.photos/800/600?random=3",
+    title: "Skleněný obklad",
+    category: "obklady",
+  },
+  {
+    id: "4",
+    url: "https://picsum.photos/800/600?random=4",
+    title: "Kuchyňský obklad",
+    category: "obklady",
+  },
+  {
+    id: "5",
+    url: "https://picsum.photos/800/600?random=5",
+    title: "Posuvné dveře",
+    category: "dvere",
+  },
+  {
+    id: "6",
+    url: "https://picsum.photos/800/600?random=6",
+    title: "Skleněná příčka",
+    category: "dvere",
+  },
+  {
+    id: "7",
+    url: "https://picsum.photos/800/600?random=7",
+    title: "Zábradlí 1",
+    category: "zabradli",
+  },
+  {
+    id: "8",
+    url: "https://picsum.photos/800/600?random=8",
+    title: "Zábradlí 2",
+    category: "zabradli",
+  },
+];
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout>
+  <Header />
+  <Hero openingHours={openingHoursData} />
+  <EmergencyBanner
+    phone={emergencyContactData.phone}
+    showAlert={emergencyContactData.show_alert}
+  />
+  <Spacer size="xl" />
+  <About />
+  <Spacer size="xl" />
+  <Services />
+  <Spacer size="xl" />
+  <Gallery images={galleryImages} />
+  <Spacer size="xl" />
+  <Contact openingHours={openingHoursData} />
+  <Spacer size="lg" />
+  <Footer />
+</Layout>

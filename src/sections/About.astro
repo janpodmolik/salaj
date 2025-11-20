@@ -1,0 +1,26 @@
+---
+import { siteConfig } from "../config";
+
+const { name, company } = siteConfig;
+---
+
+<section id="o-nas" class="about-section">
+  <div class="container">
+    <h2 class="section-title glass-card-gradient">O nás</h2>
+    <div class="about-content glass-card">
+      <p>
+        S více než {company.yearsInBusiness}letou tradicí jsme rodinná firma
+        specializující se na kompletní sklenářské služby. Naše práce je
+        charakterizována vysokou kvalitou, profesionalitou a individuálním
+        přístupem ke každému zákazníkovi.
+      </p>
+      <p>
+        Disponujeme nejmodernější technologií včetně {
+          company.equipment.join(" a ")
+        }, což nám umožňuje realizovat i nejnáročnější zakázky s maximální
+        přesností.
+      </p>
+      <p>Naše působnost zahrnuje {company.coverage.join(", ")}.</p>
+    </div>
+  </div>
+</section>

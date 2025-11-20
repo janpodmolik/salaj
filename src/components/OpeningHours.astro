@@ -1,0 +1,74 @@
+---
+interface Props {
+  days: string;
+  hours: string;
+  enabled: boolean;
+}
+
+const { days, hours, enabled } = Astro.props;
+---
+
+<div class="opening-hours-widget">
+  <div class="status-indicator">
+    <span id="status-badge" class="badge"></span>
+  </div>
+  {enabled && (
+    <div class="hours-info">
+      <p><strong>{days}:</strong> {hours}</p>
+    </div>
+  )}
+</div>
+
+<script>
+  function checkOpeningStatus() {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const currentTime = hours + minutes / 60;
+
+    const badge = document.getElementById('status-badge');
+    if (!badge) return;
+
+    // Po-Pá = 1-5 (Monday to Friday)
+    // 7:00 - 16:30
+    const isWeekday = day >= 1 && day <= 5;
+    const isOpenHours = currentTime >= 7 && currentTime < 16.5;
+
+    if (isWeekday && isOpenHours) {
+      badge.textContent = 'Otevřeno teď';
+      badge.className = 'badge badge-open';
+    } else {
+      badge.textContent = 'Zavřeno';
+      badge.className = 'badge badge-closed';
+    }
+  }
+
+  // Check status on load
+  checkOpeningStatus();
+
+  // Update every minute
+  setInterval(checkOpeningStatus, 60000);
+</script>
+
+<style>
+  .opening-hours-widget {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .hours-info p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 768px) {
+    .opening-hours-widget {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+</style>

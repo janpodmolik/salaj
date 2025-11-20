@@ -1,0 +1,254 @@
+---
+const navLinks = [
+  { href: "#o-nas", label: "O nás" },
+  { href: "#sluzby", label: "Služby" },
+  { href: "#galerie", label: "Galerie" },
+  { href: "#kontakt", label: "Kontakt" },
+];
+---
+
+<header id="header" class="site-header">
+  <nav class="navbar glass-card">
+    <div class="container nav-container">
+      <a href="#" class="logo">
+        <img
+          src="/salaj/logo-salaj.png"
+          alt="SALAJ Sklenářství Logo"
+          class="logo-img"
+        />
+      </a>
+
+      <button
+        class="mobile-menu-toggle"
+        id="mobile-menu-toggle"
+        aria-label="Toggle menu"
+      >
+        <span class="hamburger"></span>
+      </button>
+
+      <ul class="nav-links" id="nav-links">
+        {
+          navLinks.map((link) => (
+            <li>
+              <a href={link.href}>{link.label}</a>
+            </li>
+          ))
+        }
+        <li>
+          <a href="tel:604762150" class="btn btn-emergency btn-sm">
+            604 762 150
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<script>
+  const toggle = document.getElementById("mobile-menu-toggle");
+  const navLinks = document.getElementById("nav-links");
+  const header = document.getElementById("header");
+
+  // Mobile menu toggle
+  toggle?.addEventListener("click", () => {
+    navLinks?.classList.toggle("active");
+    toggle?.classList.toggle("active");
+  });
+
+  // Close menu when clicking a link
+  document.querySelectorAll(".nav-links a").forEach((link) => {
+    link.addEventListener("click", () => {
+      navLinks?.classList.remove("active");
+      toggle?.classList.remove("active");
+    });
+  });
+
+  // Sticky header on scroll
+  let lastScroll = 0;
+  window.addEventListener("scroll", () => {
+    const currentScroll = window.pageYOffset;
+
+    if (currentScroll > 100) {
+      header?.classList.add("scrolled");
+    } else {
+      header?.classList.remove("scrolled");
+    }
+
+    lastScroll = currentScroll;
+  });
+</script>
+
+<style>
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    transition: all var(--transition-smooth);
+  }
+
+  .navbar {
+    padding: 1rem 0;
+    transition: all var(--transition-smooth);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+  }
+
+  .site-header.scrolled .navbar {
+    padding: 0.5rem 0;
+    background: var(--glass-white-strong);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    box-shadow: 0 4px 20px rgba(17, 45, 78, 0.15);
+    border-bottom: 2px solid var(--glass-border);
+  }
+
+  .nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: transform var(--transition-smooth);
+  }
+
+  .logo:hover {
+    transform: scale(1.05);
+  }
+
+  .logo-img {
+    height: 60px;
+    width: auto;
+    filter: drop-shadow(0 2px 8px rgba(17, 45, 78, 0.3));
+  }
+
+  .nav-links {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .nav-links a {
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: color var(--transition-fast);
+    position: relative;
+  }
+
+  .nav-links a:not(.btn)::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--accent-primary);
+    transition: width var(--transition-smooth);
+  }
+
+  .nav-links a:not(.btn):hover::after {
+    width: 100%;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .nav-links .btn-emergency {
+    color: #ffffff !important;
+  }
+
+  .mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+  }
+
+  .hamburger {
+    display: block;
+    width: 28px;
+    height: 2px;
+    background: var(--text-primary);
+    position: relative;
+    transition: background var(--transition-fast);
+  }
+
+  .hamburger::before,
+  .hamburger::after {
+    content: "";
+    position: absolute;
+    width: 28px;
+    height: 2px;
+    background: var(--text-primary);
+    transition: transform var(--transition-smooth);
+  }
+
+  .hamburger::before {
+    top: -8px;
+  }
+
+  .hamburger::after {
+    bottom: -8px;
+  }
+
+  .mobile-menu-toggle.active .hamburger {
+    background: transparent;
+  }
+
+  .mobile-menu-toggle.active .hamburger::before {
+    transform: rotate(45deg) translate(5px, 6px);
+  }
+
+  .mobile-menu-toggle.active .hamburger::after {
+    transform: rotate(-45deg) translate(5px, -6px);
+  }
+
+  @media (max-width: 768px) {
+    .mobile-menu-toggle {
+      display: block;
+    }
+
+    .nav-links {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      background: var(--glass-white-strong);
+      backdrop-filter: blur(20px);
+      padding: 2rem;
+      gap: 1.5rem;
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-smooth);
+      border-bottom: 1px solid var(--glass-border);
+      box-shadow: 0 8px 32px 0 var(--glass-shadow);
+    }
+
+    .nav-links.active {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .nav-links li {
+      width: 100%;
+      text-align: center;
+    }
+
+    .btn-emergency {
+      width: 100%;
+      color: #ffffff !important;
+    }
+  }
+</style>

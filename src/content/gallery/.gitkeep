@@ -1,0 +1,9 @@
+---
+title: "Příklad galerie"
+category: "sprchovekouty"
+image: "https://picsum.photos/800/600?random=1"
+description: "Toto je ukázkový obrázek. Přidejte své fotografie přes CMS na /admin"
+order: 0
+date: "2025-11-20T00:00:00.000Z"
+---
+

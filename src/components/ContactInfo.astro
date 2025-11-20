@@ -1,0 +1,233 @@
+---
+import { siteConfig } from "../config";
+import Icon from "./Icon.astro";
+
+interface ContactCard {
+  type: "link" | "info";
+  icon: "phone" | "email" | "location" | "clock";
+  label: string;
+  value: string;
+  href?: string;
+}
+
+const contactCards: ContactCard[] = [
+  {
+    type: "link",
+    icon: "location",
+    label: "Adresa",
+    value: `${siteConfig.contact.address.street}\n${siteConfig.contact.address.detail}\n${siteConfig.contact.address.zip} ${siteConfig.contact.address.city}`,
+    href: siteConfig.contact.googleMapsUrl,
+  },
+  {
+    type: "link",
+    icon: "phone",
+    label: "Telefon",
+    value: siteConfig.contact.phone,
+    href: `tel:${siteConfig.contact.phoneLink}`,
+  },
+  {
+    type: "link",
+    icon: "email",
+    label: "E-mail",
+    value: siteConfig.contact.email,
+    href: `mailto:${siteConfig.contact.email}`,
+  },
+];
+
+interface Props {
+  openingHours: { days: string; hours: string };
+}
+
+const { openingHours } = Astro.props;
+---
+
+<div class="contact-info">
+  <h3>Kontaktní údaje</h3>
+
+  {
+    contactCards.map((card) => (
+      <a
+        href={card.href}
+        class="contact-card glass-card"
+        {...(card.href?.startsWith("http") && {
+          target: "_blank",
+          rel: "noopener noreferrer",
+        })}
+      >
+        <div class="contact-card-icon">
+          <Icon name={card.icon} size={24} />
+        </div>
+        <div class="contact-card-content">
+          <strong>{card.label}</strong>
+          <p set:html={card.value.replace(/\n/g, "<br />")} />
+        </div>
+        <div class="contact-card-arrow">→</div>
+      </a>
+    ))
+  }
+
+  <div class="contact-card glass-card contact-card-info">
+    <div class="contact-card-icon">
+      <Icon name="clock" size={24} />
+    </div>
+    <div class="contact-card-content">
+      <strong>Otevírací doba</strong>
+      <p>{openingHours.days}: {openingHours.hours}</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .contact-info h3 {
+    color: var(--accent-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+  }
+
+  .contact-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all var(--transition-smooth);
+    cursor: pointer;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 2px solid var(--glass-border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .contact-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      135deg,
+      var(--glass-light) 0%,
+      var(--glass-white) 100%
+    );
+    opacity: 0;
+    transition: opacity var(--transition-smooth);
+    z-index: -1;
+  }
+
+  .contact-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(63, 114, 175, 0.15) 50%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+    pointer-events: none;
+  }
+
+  .contact-card:hover::after {
+    transform: translateX(100%);
+  }
+
+  .contact-card:hover::before {
+    opacity: 1;
+  }
+
+  .contact-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-primary);
+    box-shadow: 0 8px 24px rgba(63, 114, 175, 0.2);
+  }
+
+  .contact-card:active {
+    transform: translateY(-2px);
+  }
+
+  .contact-card-info {
+    cursor: default;
+  }
+
+  .contact-card-info:hover {
+    transform: none;
+    border-color: var(--glass-border);
+  }
+
+  .contact-card-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--glass-medium);
+    border-radius: var(--radius-sm);
+    color: var(--text-light);
+    transition: all var(--transition-smooth);
+  }
+
+  .contact-card:hover .contact-card-icon {
+    background: var(--accent-primary);
+    transform: scale(1.1);
+  }
+
+  .contact-card-info .contact-card-icon {
+    background: var(--glass-gray-medium);
+    color: var(--text-primary);
+  }
+
+  .contact-card-info:hover .contact-card-icon {
+    transform: none;
+    background: var(--glass-gray-medium);
+  }
+
+  .contact-card-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .contact-card-content strong {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+  }
+
+  .contact-card-content p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .contact-card-arrow {
+    flex-shrink: 0;
+    font-size: 1.5rem;
+    color: var(--accent-primary);
+    opacity: 0.5;
+    transition: all var(--transition-smooth);
+  }
+
+  .contact-card:hover .contact-card-arrow {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+</style>
