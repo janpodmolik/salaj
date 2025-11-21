@@ -172,7 +172,7 @@ const { name, company } = siteConfig;
     };
 
     // Clear fog on mouse move with realistic wipe effect
-    let clearRadius = 80;
+    let clearRadius = 150;
 
     const clearFog = (x: number, y: number) => {
       ctx.globalCompositeOperation = "destination-out";
@@ -211,15 +211,15 @@ const { name, company } = siteConfig;
       clearFog(x, y);
     });
 
-    // Touch support for mobile
+    // Touch support for mobile - both scroll and brush work
     hero.addEventListener("touchmove", (e) => {
-      e.preventDefault();
+      // Always clear fog where finger is, don't prevent scroll
       const rect = hero.getBoundingClientRect();
       const touch = e.touches[0];
       const x = touch.clientX - rect.left;
       const y = touch.clientY - rect.top;
       clearFog(x, y);
-    });
+    }, { passive: true });
 
     // Initialize
     resizeCanvas();
