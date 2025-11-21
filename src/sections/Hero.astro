@@ -218,6 +218,11 @@ const { name } = siteConfig;
   }
 
   // === Event Handlers ===
+  hero.addEventListener("mouseenter", (e) => {
+    const rect = hero.getBoundingClientRect();
+    clearFog(e.clientX - rect.left, e.clientY - rect.top);
+  });
+
   hero.addEventListener("mousemove", (e) => {
     const rect = hero.getBoundingClientRect();
     clearFog(e.clientX - rect.left, e.clientY - rect.top);
@@ -270,21 +275,21 @@ const { name } = siteConfig;
       ) {
         // Save cleared areas by getting current canvas state
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        
+
         // Resize canvas
         canvas.width = newWidth;
         canvas.height = newHeight;
-        
+
         // Redraw fog first
         droplets = generateDroplets(DROPLET_COUNT);
         streaks = generateStreaks(STREAK_COUNT);
         drawFog();
-        
+
         // Then restore cleared areas
         ctx.globalCompositeOperation = "destination-out";
         ctx.putImageData(imageData, 0, 0);
         ctx.globalCompositeOperation = "source-over";
-        
+
         lastWidth = newWidth;
         lastHeight = newHeight;
       }
