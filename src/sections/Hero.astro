@@ -7,7 +7,7 @@ interface Props {
 }
 
 const { openingHours } = Astro.props;
-const { name, company } = siteConfig;
+const { name } = siteConfig;
 ---
 
 <section id="hero" class="hero-section">
@@ -17,8 +17,8 @@ const { name, company } = siteConfig;
       <div class="hero-inner">
         <h1 class="fade-in-up">{name}</h1>
         <p class="hero-subtitle">
-          Více než {company.yearsInBusiness} let působíme úspěšně v oblasti práce
-          se sklem v České republice.
+          Více než 30 let působíme úspěšně v oblasti práce se sklem v České
+          republice.
         </p>
         <p class="hero-description">
           Kvalitně a odborně provedené sklenářské práce tvoří jasnou známku naší
@@ -43,195 +43,256 @@ const { name, company } = siteConfig;
 </section>
 
 <script>
+  // === DOM Elements ===
   const canvas = document.getElementById("fog-canvas") as HTMLCanvasElement;
-  const ctx = canvas.getContext("2d");
-  const hero = document.getElementById("foggy-hero");
+  const ctx = canvas.getContext("2d")!;
+  const hero = document.getElementById("foggy-hero")!;
 
-  if (canvas && ctx && hero) {
-    // Set canvas size
-    const resizeCanvas = () => {
-      canvas.width = hero.offsetWidth;
-      canvas.height = hero.offsetHeight;
-      drawFog();
-    };
+  if (!canvas || !ctx || !hero) {
+    throw new Error("Required elements not found");
+  }
 
-    // Generate water droplets for realistic condensation effect
-    const generateDroplets = (count: number) => {
-      const droplets = [];
-      for (let i = 0; i < count; i++) {
-        droplets.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          radius: Math.random() * 3 + 0.5,
-          opacity: Math.random() * 0.3 + 0.2,
-        });
-      }
-      return droplets;
-    };
+  // === Configuration ===
+  const DROPLET_COUNT = 150;
+  const STREAK_COUNT = 12;
+  const CLEAR_RADIUS = 150;
+  const MAX_RADIUS = 600;
+  const RADIUS_GROWTH_RATE = 2;
+  const RESIZE_DEBOUNCE = 250;
+  const FRAME_INTERVAL = 16; // ~60fps
 
-    // Generate water streaks running down
-    const generateStreaks = (count: number) => {
-      const streaks = [];
-      for (let i = 0; i < count; i++) {
-        streaks.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height * 0.3,
-          length: Math.random() * 100 + 50,
-          width: Math.random() * 2 + 0.5,
-          opacity: Math.random() * 0.2 + 0.1,
-        });
-      }
-      return streaks;
-    };
+  // === State ===
+  let droplets = generateDroplets(DROPLET_COUNT);
+  let streaks = generateStreaks(STREAK_COUNT);
+  let currentRadius = CLEAR_RADIUS;
+  let touchHoldInterval: number | null = null;
+  let lastTouchX = 0;
+  let lastTouchY = 0;
+  let lastWidth = 0;
+  let lastHeight = 0;
+  let resizeTimeout: number;
 
-    let droplets = generateDroplets(150);
-    let streaks = generateStreaks(12);
+  // === Helper Functions ===
+  function generateDroplets(count: number) {
+    return Array.from({ length: count }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      radius: Math.random() * 3 + 0.5,
+      opacity: Math.random() * 0.3 + 0.2,
+    }));
+  }
 
-    // Draw realistic fogged glass
-    const drawFog = () => {
-      // Base fog layer with gradient (darker at edges, lighter in center)
-      const gradient = ctx.createRadialGradient(
-        canvas.width / 2,
-        canvas.height / 2,
+  function generateStreaks(count: number) {
+    return Array.from({ length: count }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height * 0.3,
+      length: Math.random() * 100 + 50,
+      width: Math.random() * 2 + 0.5,
+      opacity: Math.random() * 0.2 + 0.1,
+    }));
+  }
+
+  function resizeCanvas() {
+    canvas.width = hero.offsetWidth;
+    canvas.height = hero.offsetHeight;
+    drawFog();
+  }
+
+  function drawFog() {
+    // Base fog gradient
+    const gradient = ctx.createRadialGradient(
+      canvas.width / 2,
+      canvas.height / 2,
+      0,
+      canvas.width / 2,
+      canvas.height / 2,
+      canvas.width * 0.7
+    );
+    gradient.addColorStop(0, "rgba(219, 226, 239, 0.5)");
+    gradient.addColorStop(0.5, "rgba(219, 226, 239, 0.6)");
+    gradient.addColorStop(1, "rgba(219, 226, 239, 0.65)");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Add grain texture
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      const noise = (Math.random() - 0.5) * 8;
+      data[i] += noise;
+      data[i + 1] += noise;
+      data[i + 2] += noise;
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    // Draw droplets
+    droplets.forEach((droplet) => {
+      ctx.beginPath();
+      ctx.arc(droplet.x, droplet.y, droplet.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${droplet.opacity * 0.6})`;
+      ctx.fill();
+
+      // Droplet highlight
+      ctx.beginPath();
+      ctx.arc(
+        droplet.x - droplet.radius * 0.3,
+        droplet.y - droplet.radius * 0.3,
+        droplet.radius * 0.4,
         0,
-        canvas.width / 2,
-        canvas.height / 2,
-        canvas.width * 0.7
+        Math.PI * 2
       );
-      gradient.addColorStop(0, "rgba(219, 226, 239, 0.5)");
-      gradient.addColorStop(0.5, "rgba(219, 226, 239, 0.6)");
-      gradient.addColorStop(1, "rgba(219, 226, 239, 0.65)");
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Add noise/grain texture for realistic glass effect
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      for (let i = 0; i < data.length; i += 4) {
-        const noise = (Math.random() - 0.5) * 8;
-        data[i] += noise; // R
-        data[i + 1] += noise; // G
-        data[i + 2] += noise; // B
-      }
-      ctx.putImageData(imageData, 0, 0);
-
-      // Draw water droplets
-      droplets.forEach((droplet) => {
-        ctx.beginPath();
-        ctx.arc(droplet.x, droplet.y, droplet.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${droplet.opacity * 0.6})`;
-        ctx.fill();
-
-        // Add highlight to droplet
-        ctx.beginPath();
-        ctx.arc(
-          droplet.x - droplet.radius * 0.3,
-          droplet.y - droplet.radius * 0.3,
-          droplet.radius * 0.4,
-          0,
-          Math.PI * 2
-        );
-        ctx.fillStyle = `rgba(255, 255, 255, ${droplet.opacity * 0.3})`;
-        ctx.fill();
-      });
-
-      // Draw water streaks
-      streaks.forEach((streak) => {
-        ctx.beginPath();
-        ctx.moveTo(streak.x, streak.y);
-        ctx.lineTo(streak.x + Math.sin(streak.x) * 5, streak.y + streak.length);
-        ctx.strokeStyle = `rgba(200, 210, 220, ${streak.opacity * 0.7})`;
-        ctx.lineWidth = streak.width;
-        ctx.stroke();
-      });
-
-      // Add frosted glass pattern (crystalline structures)
-      for (let i = 0; i < 30; i++) {
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
-        const size = Math.random() * 20 + 10;
-
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(Math.random() * Math.PI);
-        ctx.strokeStyle = `rgba(255, 255, 255, ${Math.random() * 0.05})`;
-        ctx.lineWidth = 0.5;
-
-        // Draw crystalline pattern
-        for (let j = 0; j < 6; j++) {
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(
-            size * Math.cos((j * Math.PI) / 3),
-            size * Math.sin((j * Math.PI) / 3)
-          );
-          ctx.stroke();
-        }
-        ctx.restore();
-      }
-    };
-
-    // Clear fog on mouse move with realistic wipe effect
-    let clearRadius = 150;
-
-    const clearFog = (x: number, y: number) => {
-      ctx.globalCompositeOperation = "destination-out";
-
-      // Multiple passes for softer, more realistic clearing
-      for (let i = 0; i < 3; i++) {
-        const radius = clearRadius * (1 - i * 0.2);
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-        gradient.addColorStop(0, "rgba(0, 0, 0, 0.8)");
-        gradient.addColorStop(0.4, "rgba(0, 0, 0, 0.4)");
-        gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
-
-        ctx.fillStyle = gradient;
-        ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-      }
-
-      ctx.globalCompositeOperation = "source-over";
-
-      // Remove droplets in cleared area
-      droplets = droplets.filter((droplet) => {
-        const distance = Math.sqrt((droplet.x - x) ** 2 + (droplet.y - y) ** 2);
-        return distance > clearRadius;
-      });
-
-      // Remove streaks in cleared area
-      streaks = streaks.filter((streak) => {
-        const distance = Math.sqrt((streak.x - x) ** 2 + (streak.y - y) ** 2);
-        return distance > clearRadius * 0.7;
-      });
-    };
-
-    hero.addEventListener("mousemove", (e) => {
-      const rect = hero.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      clearFog(x, y);
+      ctx.fillStyle = `rgba(255, 255, 255, ${droplet.opacity * 0.3})`;
+      ctx.fill();
     });
 
-    // Touch support for mobile - both scroll and brush work
-    hero.addEventListener("touchmove", (e) => {
-      // Always clear fog where finger is, don't prevent scroll
-      const rect = hero.getBoundingClientRect();
-      const touch = e.touches[0];
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      clearFog(x, y);
-    }, { passive: true });
+    // Draw streaks
+    streaks.forEach((streak) => {
+      ctx.beginPath();
+      ctx.moveTo(streak.x, streak.y);
+      ctx.lineTo(streak.x + Math.sin(streak.x) * 5, streak.y + streak.length);
+      ctx.strokeStyle = `rgba(200, 210, 220, ${streak.opacity * 0.7})`;
+      ctx.lineWidth = streak.width;
+      ctx.stroke();
+    });
 
-    // Initialize
-    resizeCanvas();
-    
-    let resizeTimeout: number;
-    window.addEventListener("resize", () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = window.setTimeout(() => {
-        canvas.width = hero.offsetWidth;
-        canvas.height = hero.offsetHeight;
-        // Don't redraw fog - keep the cleared state
-      }, 250);
+    // Draw crystalline patterns
+    for (let i = 0; i < 30; i++) {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      const size = Math.random() * 20 + 10;
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(Math.random() * Math.PI);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${Math.random() * 0.05})`;
+      ctx.lineWidth = 0.5;
+
+      for (let j = 0; j < 6; j++) {
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(
+          size * Math.cos((j * Math.PI) / 3),
+          size * Math.sin((j * Math.PI) / 3)
+        );
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+
+  function clearFog(x: number, y: number, useCurrentRadius = false) {
+    const activeRadius = useCurrentRadius ? currentRadius : CLEAR_RADIUS;
+    ctx.globalCompositeOperation = "destination-out";
+
+    // Multi-pass clearing for soft edges
+    for (let i = 0; i < 3; i++) {
+      const radius = activeRadius * (1 - i * 0.2);
+      const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+      gradient.addColorStop(0, "rgba(0, 0, 0, 0.8)");
+      gradient.addColorStop(0.4, "rgba(0, 0, 0, 0.4)");
+      gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+    }
+
+    ctx.globalCompositeOperation = "source-over";
+
+    // Remove particles in cleared area
+    droplets = droplets.filter((d) => {
+      const dist = Math.sqrt((d.x - x) ** 2 + (d.y - y) ** 2);
+      return dist > activeRadius;
+    });
+
+    streaks = streaks.filter((s) => {
+      const dist = Math.sqrt((s.x - x) ** 2 + (s.y - y) ** 2);
+      return dist > activeRadius * 0.7;
     });
   }
+
+  function stopTouchHold() {
+    if (touchHoldInterval) {
+      clearInterval(touchHoldInterval);
+      touchHoldInterval = null;
+    }
+    currentRadius = CLEAR_RADIUS;
+  }
+
+  // === Event Handlers ===
+  hero.addEventListener("mousemove", (e) => {
+    const rect = hero.getBoundingClientRect();
+    clearFog(e.clientX - rect.left, e.clientY - rect.top);
+  });
+
+  hero.addEventListener(
+    "touchstart",
+    (e) => {
+      currentRadius = CLEAR_RADIUS;
+      const rect = hero.getBoundingClientRect();
+      const touch = e.touches[0];
+      lastTouchX = touch.clientX - rect.left;
+      lastTouchY = touch.clientY - rect.top;
+
+      touchHoldInterval = window.setInterval(() => {
+        if (currentRadius < MAX_RADIUS) {
+          currentRadius += RADIUS_GROWTH_RATE;
+          clearFog(lastTouchX, lastTouchY, true);
+        }
+      }, FRAME_INTERVAL);
+    },
+    { passive: true }
+  );
+
+  hero.addEventListener(
+    "touchmove",
+    (e) => {
+      const rect = hero.getBoundingClientRect();
+      const touch = e.touches[0];
+      lastTouchX = touch.clientX - rect.left;
+      lastTouchY = touch.clientY - rect.top;
+      clearFog(lastTouchX, lastTouchY, true);
+    },
+    { passive: true }
+  );
+
+  hero.addEventListener("touchend", stopTouchHold, { passive: true });
+  hero.addEventListener("touchcancel", stopTouchHold, { passive: true });
+
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = window.setTimeout(() => {
+      const newWidth = hero.offsetWidth;
+      const newHeight = hero.offsetHeight;
+
+      // Only resize on significant changes (ignore mobile address bar)
+      if (
+        Math.abs(newWidth - lastWidth) > 50 ||
+        Math.abs(newHeight - lastHeight) > 100
+      ) {
+        // Save cleared areas by getting current canvas state
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        
+        // Resize canvas
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        
+        // Redraw fog first
+        droplets = generateDroplets(DROPLET_COUNT);
+        streaks = generateStreaks(STREAK_COUNT);
+        drawFog();
+        
+        // Then restore cleared areas
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.putImageData(imageData, 0, 0);
+        ctx.globalCompositeOperation = "source-over";
+        
+        lastWidth = newWidth;
+        lastHeight = newHeight;
+      }
+    }, RESIZE_DEBOUNCE);
+  });
+
+  // === Initialize ===
+  resizeCanvas();
+  lastWidth = hero.offsetWidth;
+  lastHeight = hero.offsetHeight;
 </script>

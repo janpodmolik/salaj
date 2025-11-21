@@ -12,11 +12,15 @@ const { days, hours, enabled } = Astro.props;
   <div class="status-indicator">
     <span id="status-badge" class="badge"></span>
   </div>
-  {enabled && (
-    <div class="hours-info">
-      <p><strong>{days}:</strong> {hours}</p>
-    </div>
-  )}
+  {
+    enabled && (
+      <div class="hours-info">
+        <p>
+          <strong>{days}:</strong> {hours}
+        </p>
+      </div>
+    )
+  }
 </div>
 
 <script>
@@ -27,7 +31,7 @@ const { days, hours, enabled } = Astro.props;
     const minutes = now.getMinutes();
     const currentTime = hours + minutes / 60;
 
-    const badge = document.getElementById('status-badge');
+    const badge = document.getElementById("status-badge");
     if (!badge) return;
 
     // Po-Pá = 1-5 (Monday to Friday)
@@ -36,11 +40,11 @@ const { days, hours, enabled } = Astro.props;
     const isOpenHours = currentTime >= 7 && currentTime < 16.5;
 
     if (isWeekday && isOpenHours) {
-      badge.textContent = 'Otevřeno teď';
-      badge.className = 'badge badge-open';
+      badge.textContent = "Otevřeno teď";
+      badge.className = "badge badge-open";
     } else {
-      badge.textContent = 'Zavřeno';
-      badge.className = 'badge badge-closed';
+      badge.textContent = "Zavřeno";
+      badge.className = "badge badge-closed";
     }
   }
 
