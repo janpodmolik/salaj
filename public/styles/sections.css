@@ -1,14 +1,15 @@
 /* Section Title Styles */
 .section-title {
   text-align: center;
-  padding: 2rem 3rem;
-  margin: 0 auto 3rem;
-  max-width: 600px;
+  padding: 1.25rem 2rem;
+  margin: 0 auto 2.5rem;
+  max-width: 500px;
   border-radius: var(--radius-md);
   border: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px rgba(63, 114, 175, 0.3);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
+  font-size: 1.75rem;
 }
 
 /* Hero Section */
@@ -83,7 +84,7 @@
 
 /* About Section */
 .about-section {
-  padding: 0 2rem;
+  padding: 0;
 }
 
 .about-content {
@@ -129,7 +130,7 @@
 
 /* Services Section */
 .services-section {
-  padding: 0 2rem;
+  padding: 0;
 }
 
 .services-grid {
@@ -267,7 +268,7 @@
 
 /* Contact Section */
 .contact-section {
-  padding: 0 2rem;
+  padding: 0;
 }
 
 .contact-grid {
@@ -389,7 +390,21 @@
     grid-template-columns: 1fr;
   }
 
+  .about-section,
+  .services-section,
+  .contact-section {
+    padding: 0;
+  }
+
   .about-content {
     padding: 2rem;
+  }
+
+  .contact-form-wrapper {
+    padding: 1.5rem;
+  }
+
+  .service-card {
+    padding: 1.5rem;
   }
 }
